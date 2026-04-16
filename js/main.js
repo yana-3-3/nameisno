@@ -242,16 +242,33 @@ player.subscribe((data) => {
 });
 
 // ============================================
-// 5) 사이드바 탭 전환 (인벤토리 ↔ 채팅)
+// 5) 슬라이드 패널 토글 (인벤토리/채팅)
 // ============================================
 
-document.querySelectorAll(".side-tab").forEach((tab) => {
-  tab.addEventListener("click", () => {
-    const which = tab.dataset.side;
-    document.querySelectorAll(".side-tab").forEach((t) => t.classList.toggle("active", t === tab));
-    document.querySelectorAll(".side-panel").forEach((p) => {
-      p.classList.toggle("active", p.id === `panel-${which}`);
-    });
+function togglePanel(panelId) {
+  const panel = document.getElementById(`panel-${panelId}`);
+  const btn = document.querySelector(`[data-panel="${panelId}"]`);
+  const isOpen = !panel.classList.contains("hidden");
+
+  // 다른 패널 닫기
+  document.querySelectorAll(".slide-panel").forEach(p => p.classList.add("hidden"));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+
+  if (!isOpen) {
+    panel.classList.remove("hidden");
+    btn.classList.add("active");
+  }
+}
+
+document.getElementById("btn-inventory").addEventListener("click", () => togglePanel("inventory"));
+document.getElementById("btn-chat").addEventListener("click", () => togglePanel("chat"));
+document.querySelectorAll(".panel-close").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const panelId = btn.dataset.close;
+    if (panelId) {
+      document.getElementById(`panel-${panelId}`).classList.add("hidden");
+      document.querySelector(`[data-panel="${panelId}"]`)?.classList.remove("active");
+    }
   });
 });
 

@@ -2,128 +2,134 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>코지 라이프 — Cozy Life</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,500&family=Gowun+Dodum&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=DotGothic16&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <!-- ========== 로그인 / 회원가입 화면 ========== -->
+  <!-- ========== 로그인 화면 ========== -->
   <div id="auth-screen" class="screen">
+    <div class="auth-bg">
+      <div class="auth-cloud c1"></div>
+      <div class="auth-cloud c2"></div>
+      <div class="auth-cloud c3"></div>
+    </div>
     <div class="auth-card">
       <div class="auth-brand">
-        <svg viewBox="0 0 48 48" class="brand-icon" aria-hidden="true">
-          <path d="M8 28 L24 12 L40 28 L40 40 L28 40 L28 30 L20 30 L20 40 L8 40 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
-          <circle cx="34" cy="18" r="3" fill="currentColor" opacity="0.4"/>
-        </svg>
+        <div class="brand-leaf">🌿</div>
         <h1>코지 라이프</h1>
         <p class="tagline">작은 마을에서의 하루</p>
       </div>
-
       <div class="tabs">
         <button class="tab active" data-tab="login">로그인</button>
         <button class="tab" data-tab="signup">회원가입</button>
       </div>
-
       <form id="login-form" class="auth-form active">
-        <label>이메일<input type="email" id="login-email" required /></label>
-        <label>비밀번호<input type="password" id="login-password" required /></label>
+        <label><span>이메일</span><input type="email" id="login-email" required placeholder="hello@cozy.life" /></label>
+        <label><span>비밀번호</span><input type="password" id="login-password" required placeholder="••••••" /></label>
         <button type="submit" class="btn-primary">들어가기</button>
         <p class="form-error" id="login-error"></p>
       </form>
-
       <form id="signup-form" class="auth-form">
-        <label>닉네임<input type="text" id="signup-nickname" required maxlength="12" /></label>
-        <label>이메일<input type="email" id="signup-email" required /></label>
-        <label>비밀번호<input type="password" id="signup-password" required minlength="6" /></label>
+        <label><span>닉네임</span><input type="text" id="signup-nickname" required maxlength="12" placeholder="마을 이름" /></label>
+        <label><span>이메일</span><input type="email" id="signup-email" required placeholder="hello@cozy.life" /></label>
+        <label><span>비밀번호</span><input type="password" id="signup-password" required minlength="6" placeholder="6자 이상" /></label>
         <button type="submit" class="btn-primary">계정 만들기</button>
         <p class="form-error" id="signup-error"></p>
       </form>
     </div>
   </div>
 
-  <!-- ========== 게임 메인 화면 ========== -->
+  <!-- ========== 게임 화면 ========== -->
   <div id="game-screen" class="screen hidden">
-    <!-- 상단 HUD -->
-    <header class="hud">
-      <div class="hud-left">
-        <div class="player-pill">
-          <svg viewBox="0 0 24 24" class="avatar"><circle cx="12" cy="9" r="4" fill="currentColor"/><path d="M4 22c0-5 4-8 8-8s8 3 8 8" fill="currentColor"/></svg>
-          <span id="hud-nickname">—</span>
+
+    <!-- 맵 (전체 배경) -->
+    <div class="map-container">
+      <svg id="tilemap" viewBox="0 0 560 360" preserveAspectRatio="xMidYMid meet" aria-label="월드 맵"></svg>
+    </div>
+
+    <!-- HUD 오버레이 (좌상단) -->
+    <div class="hud">
+      <div class="hud-profile">
+        <div class="hud-avatar">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="4" fill="currentColor"/><path d="M4 22c0-5 4-8 8-8s8 3 8 8" fill="currentColor"/></svg>
+        </div>
+        <span class="hud-name" id="hud-nickname">—</span>
+      </div>
+      <div class="hud-bars">
+        <div class="hud-bar-row">
+          <svg class="hud-bar-icon" viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z" fill="currentColor"/></svg>
+          <div class="hud-bar"><div class="hud-bar-fill health" id="bar-health"></div></div>
+          <span class="hud-bar-num" id="num-health">100</span>
+        </div>
+        <div class="hud-bar-row">
+          <svg class="hud-bar-icon hunger-icon" viewBox="0 0 24 24"><path d="M6 4h12l-1 16H7z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>
+          <div class="hud-bar"><div class="hud-bar-fill hunger" id="bar-hunger"></div></div>
+          <span class="hud-bar-num" id="num-hunger">100</span>
         </div>
       </div>
-
-      <div class="hud-stats">
-        <div class="stat" title="체력">
-          <svg viewBox="0 0 24 24" class="stat-icon heart"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z" fill="currentColor"/></svg>
-          <div class="bar"><div class="bar-fill health" id="bar-health"></div></div>
-          <span class="stat-num" id="num-health">100</span>
-        </div>
-        <div class="stat" title="배고픔">
-          <svg viewBox="0 0 24 24" class="stat-icon hunger"><path d="M6 4h12l-1 16H7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 8h6M9 12h6" stroke="currentColor" stroke-width="1.5"/></svg>
-          <div class="bar"><div class="bar-fill hunger" id="bar-hunger"></div></div>
-          <span class="stat-num" id="num-hunger">100</span>
-        </div>
-        <div class="stat money" title="소지금">
-          <svg viewBox="0 0 24 24" class="stat-icon coin"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><text x="12" y="16" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor">G</text></svg>
-          <span class="stat-num" id="num-money">0</span>
-        </div>
+      <div class="hud-money">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="currentColor" opacity="0.2"/><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><text x="12" y="16" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor">G</text></svg>
+        <span id="num-money">0</span>
       </div>
+    </div>
 
-      <div class="hud-right">
-        <button class="icon-btn" id="btn-logout" title="로그아웃">
-          <svg viewBox="0 0 24 24"><path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <!-- 우상단 버튼들 -->
+    <div class="hud-top-right">
+      <button class="game-btn small" id="btn-logout" title="로그아웃">
+        <svg viewBox="0 0 24 24"><path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <!-- 장소 정보 + 액션 (하단) -->
+    <div class="bottom-bar">
+      <div class="location-info">
+        <h2 id="world-title">마을 광장</h2>
+        <p id="world-desc">사람들이 오가는 작은 광장이에요.</p>
+      </div>
+      <div class="action-row" id="location-cards"></div>
+    </div>
+
+    <!-- 하단 네비게이션 (인벤토리/채팅 토글) -->
+    <div class="bottom-nav">
+      <button class="nav-btn" id="btn-inventory" data-panel="inventory">
+        <svg viewBox="0 0 24 24"><path d="M4 8h16v12H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 8V5a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        <span>가방</span>
+      </button>
+      <button class="nav-btn" id="btn-chat" data-panel="chat">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16v12H8l-4 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        <span>채팅</span>
+        <span class="online-dot" id="online-dot"></span>
+      </button>
+    </div>
+
+    <!-- 인벤토리 패널 (슬라이드업) -->
+    <div class="slide-panel hidden" id="panel-inventory">
+      <div class="panel-header">
+        <h3>가방</h3>
+        <button class="panel-close" data-close="inventory">✕</button>
+      </div>
+      <div class="inventory-grid" id="inventory-grid"></div>
+      <p class="hint" id="inventory-hint">아이템을 탭해서 확인하세요</p>
+    </div>
+
+    <!-- 채팅 패널 (슬라이드업) -->
+    <div class="slide-panel hidden" id="panel-chat">
+      <div class="panel-header">
+        <h3>마을 채팅</h3>
+        <button class="panel-close" data-close="chat">✕</button>
+      </div>
+      <div class="chat-log" id="chat-log"></div>
+      <form class="chat-form" id="chat-form">
+        <input type="text" id="chat-input" placeholder="메시지 입력…" maxlength="200" autocomplete="off" />
+        <button type="submit" class="btn-send" aria-label="전송">
+          <svg viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-2-7z" fill="currentColor"/></svg>
         </button>
-      </div>
-    </header>
-
-    <!-- 본문: 좌측 월드 / 우측 사이드바 -->
-    <main class="game-main">
-      <!-- 월드 뷰 (타일맵 + 카드 액션) -->
-      <section class="world-panel">
-        <div class="world-header">
-          <h2 id="world-title">마을 광장</h2>
-          <p id="world-desc">사람들이 오가는 작은 광장이에요. 어디로 가볼까요?</p>
-        </div>
-
-        <!-- 간단한 타일맵 (SVG) -->
-        <div class="tilemap-wrap">
-          <svg id="tilemap" viewBox="0 0 560 360" preserveAspectRatio="xMidYMid meet" aria-label="월드 맵">
-            <!-- 동적으로 렌더링됨 -->
-          </svg>
-        </div>
-
-        <!-- 장소 이동 카드 -->
-        <div class="location-cards" id="location-cards"></div>
-      </section>
-
-      <!-- 사이드바: 인벤토리 + 채팅 탭 -->
-      <aside class="sidebar">
-        <div class="sidebar-tabs">
-          <button class="side-tab active" data-side="inventory">인벤토리</button>
-          <button class="side-tab" data-side="chat">채팅 <span class="online-dot" id="online-dot"></span></button>
-        </div>
-
-        <!-- 인벤토리 -->
-        <div class="side-panel active" id="panel-inventory">
-          <div class="inventory-grid" id="inventory-grid"></div>
-          <p class="hint" id="inventory-hint">빈 칸을 클릭해 아이템을 확인하세요.</p>
-        </div>
-
-        <!-- 채팅 -->
-        <div class="side-panel" id="panel-chat">
-          <div class="chat-log" id="chat-log"></div>
-          <form class="chat-form" id="chat-form">
-            <input type="text" id="chat-input" placeholder="메시지 입력…" maxlength="200" autocomplete="off" />
-            <button type="submit" class="btn-send" aria-label="전송">
-              <svg viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-2-7z" fill="currentColor"/></svg>
-            </button>
-          </form>
-        </div>
-      </aside>
-    </main>
+      </form>
+    </div>
 
     <!-- 상점 모달 -->
     <div id="shop-modal" class="modal-overlay hidden">
@@ -131,9 +137,7 @@
         <div class="shop-header">
           <h2>잡화 상점</h2>
           <span class="shop-money-display">💰 <span id="shop-money">0 G</span></span>
-          <button class="icon-btn shop-close" id="shop-close">
-            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          </button>
+          <button class="panel-close" id="shop-close">✕</button>
         </div>
         <div class="shop-mode-tabs">
           <button class="shop-mode-tab active" data-mode="buy">구매하기</button>
@@ -143,11 +147,10 @@
       </div>
     </div>
 
-    <!-- 알림 토스트 -->
+    <!-- 토스트 -->
     <div id="toast-container"></div>
   </div>
 
-  <!-- Firebase SDK (모듈 방식) + 앱 코드 -->
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

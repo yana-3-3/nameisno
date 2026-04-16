@@ -362,14 +362,18 @@ function escapeHtml(str) {
 
 let _shopMode = "buy";     // "buy" | "sell"
 let _shopCat = null;       // 현재 선택된 카테고리
+let _shopPage = 0;         // 현재 페이지
 let _onBuy = null;
 let _onSell = null;
+
+const ITEMS_PER_PAGE = 6;
 
 export function openShop(playerData, onBuy, onSell) {
   _onBuy = onBuy;
   _onSell = onSell;
   _shopMode = "buy";
   _shopCat = null;
+  _shopPage = 0;
   const modal = document.getElementById("shop-modal");
   modal.classList.remove("hidden");
   renderShopContent(playerData);
@@ -384,7 +388,6 @@ export function renderShopContent(playerData) {
   const moneyEl = document.getElementById("shop-money");
   moneyEl.textContent = (playerData?.stats?.money || 0).toLocaleString() + " G";
 
-  // 탭 활성화
   document.querySelectorAll(".shop-mode-tab").forEach(t => {
     t.classList.toggle("active", t.dataset.mode === _shopMode);
   });
@@ -398,11 +401,52 @@ export function renderShopContent(playerData) {
   }
 }
 
+function renderPagination(container, totalItems, playerData) {
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  if (totalPages <= 1) return;
+
+  const nav = document.createElement("div");
+  nav.className = "shop-pagination";
+
+  const prev = document.createElement("button");
+  prev.className = "shop-page-btn";
+  prev.textContent = "←";
+  prev.disabled = _shopPage === 0;
+  prev.addEventListener("click", () => {
+    _shopPage--;
+    renderShopContent(playerData);
+  });
+  nav.appendChild(prev);
+
+  for (let i = 0; i < totalPages; i++) {
+    const dot = document.createElement("button");
+    dot.className = "shop-page-dot" + (i === _shopPage ? " active" : "");
+    dot.textContent = i + 1;
+    dot.addEventListener("click", () => {
+      _shopPage = i;
+      renderShopContent(playerData);
+    });
+    nav.appendChild(dot);
+  }
+
+  const next = document.createElement("button");
+  next.className = "shop-page-btn";
+  next.textContent = "→";
+  next.disabled = _shopPage >= totalPages - 1;
+  next.addEventListener("click", () => {
+    _shopPage++;
+    renderShopContent(playerData);
+  });
+  nav.appendChild(next);
+
+  container.appendChild(nav);
+}
+
 function renderBuyMode(container, playerData) {
   const byCategory = getShopByCategory();
   const cats = Object.keys(byCategory);
 
-  if (!_shopCat || !byCategory[_shopCat]) _shopCat = cats[0];
+  if (!_shopCat || !byCategory[_shopCat]) { _shopCat = cats[0]; _shopPage = 0; }
 
   // 카테고리 탭들
   const catBar = document.createElement("div");
@@ -415,19 +459,22 @@ function renderBuyMode(container, playerData) {
     btn.textContent = cat.name;
     btn.addEventListener("click", () => {
       _shopCat = catKey;
+      _shopPage = 0;
       renderShopContent(playerData);
     });
     catBar.appendChild(btn);
   }
   container.appendChild(catBar);
 
-  // 아이템 리스트
-  const list = document.createElement("div");
-  list.className = "shop-list";
-  const items = byCategory[_shopCat] || [];
+  const allItems = byCategory[_shopCat] || [];
+  const start = _shopPage * ITEMS_PER_PAGE;
+  const pageItems = allItems.slice(start, start + ITEMS_PER_PAGE);
   const money = playerData?.stats?.money || 0;
 
-  for (const item of items) {
+  const list = document.createElement("div");
+  list.className = "shop-list";
+
+  for (const item of pageItems) {
     const canAfford = money >= item.buy;
     const row = document.createElement("div");
     row.className = "shop-row" + (canAfford ? "" : " cant-afford");
@@ -443,27 +490,33 @@ function renderBuyMode(container, playerData) {
     buyBtn.className = "shop-buy-btn";
     buyBtn.textContent = "구매";
     buyBtn.disabled = !canAfford;
-    buyBtn.addEventListener("click", () => {
-      if (_onBuy) _onBuy(item.id);
-    });
+    buyBtn.addEventListener("click", () => { if (_onBuy) _onBuy(item.id); });
     row.appendChild(buyBtn);
     list.appendChild(row);
   }
   container.appendChild(list);
+
+  renderPagination(container, allItems.length, playerData);
 }
 
 function renderSellMode(container, playerData) {
   const inv = playerData?.inventory || [];
-  const list = document.createElement("div");
-  list.className = "shop-list";
 
   if (inv.length === 0) {
+    const list = document.createElement("div");
+    list.className = "shop-list";
     list.innerHTML = `<div class="shop-empty">판매할 아이템이 없어요</div>`;
     container.appendChild(list);
     return;
   }
 
-  for (const slot of inv) {
+  const start = _shopPage * ITEMS_PER_PAGE;
+  const pageItems = inv.slice(start, start + ITEMS_PER_PAGE);
+
+  const list = document.createElement("div");
+  list.className = "shop-list";
+
+  for (const slot of pageItems) {
     const item = ITEMS[slot.id];
     if (!item) continue;
     const row = document.createElement("div");
@@ -479,15 +532,16 @@ function renderSellMode(container, playerData) {
     const sellBtn = document.createElement("button");
     sellBtn.className = "shop-sell-btn";
     sellBtn.textContent = "판매";
-    sellBtn.addEventListener("click", () => {
-      if (_onSell) _onSell(item.id);
-    });
+    sellBtn.addEventListener("click", () => { if (_onSell) _onSell(item.id); });
     row.appendChild(sellBtn);
     list.appendChild(row);
   }
   container.appendChild(list);
+
+  renderPagination(container, inv.length, playerData);
 }
 
 export function setShopMode(mode) {
   _shopMode = mode;
+  _shopPage = 0;
 }
