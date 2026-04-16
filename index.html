@@ -90,7 +90,7 @@
 
         <!-- 간단한 타일맵 (SVG) -->
         <div class="tilemap-wrap">
-          <svg id="tilemap" viewBox="0 0 400 240" preserveAspectRatio="xMidYMid meet" aria-label="월드 맵">
+          <svg id="tilemap" viewBox="0 0 560 360" preserveAspectRatio="xMidYMid meet" aria-label="월드 맵">
             <!-- 동적으로 렌더링됨 -->
           </svg>
         </div>
@@ -124,6 +124,24 @@
         </div>
       </aside>
     </main>
+
+    <!-- 상점 모달 -->
+    <div id="shop-modal" class="modal-overlay hidden">
+      <div class="shop-card">
+        <div class="shop-header">
+          <h2>잡화 상점</h2>
+          <span class="shop-money-display">💰 <span id="shop-money">0 G</span></span>
+          <button class="icon-btn shop-close" id="shop-close">
+            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="shop-mode-tabs">
+          <button class="shop-mode-tab active" data-mode="buy">구매하기</button>
+          <button class="shop-mode-tab" data-mode="sell">판매하기</button>
+        </div>
+        <div class="shop-body" id="shop-items"></div>
+      </div>
+    </div>
 
     <!-- 알림 토스트 -->
     <div id="toast-container"></div>

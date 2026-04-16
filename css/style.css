@@ -392,6 +392,182 @@ input { font-family: inherit; }
   to { opacity: 0; transform: translateY(10px); }
 }
 
+/* ============================================
+   상점 모달
+   ============================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(59, 46, 34, 0.5);
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.hidden { display: none !important; }
+
+.shop-card {
+  width: 100%;
+  max-width: 520px;
+  max-height: 80vh;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: shop-in 0.25s ease;
+}
+@keyframes shop-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+.shop-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.shop-header h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 600;
+  flex: 1;
+}
+.shop-money-display {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gold);
+}
+.shop-close { flex-shrink: 0; }
+
+.shop-mode-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--line);
+}
+.shop-mode-tab {
+  flex: 1;
+  padding: 10px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.2s;
+}
+.shop-mode-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+.shop-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  min-height: 0;
+}
+
+/* 카테고리 바 */
+.shop-cat-bar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.shop-cat-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  border-radius: 100px;
+  background: var(--cream);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  transition: all 0.15s;
+}
+.shop-cat-btn.active {
+  background: var(--cat-color, var(--accent));
+  color: #fff;
+  border-color: transparent;
+}
+.shop-cat-btn:hover:not(.active) {
+  border-color: var(--cat-color, var(--accent));
+}
+
+/* 아이템 리스트 */
+.shop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.shop-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--cream);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.15s;
+}
+.shop-row:hover { border-color: var(--accent); }
+.shop-row.cant-afford { opacity: 0.45; }
+
+.shop-row-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  background: var(--paper);
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+}
+.shop-row-icon svg { width: 28px; height: 28px; }
+
+.shop-row-info { flex: 1; min-width: 0; }
+.shop-row-name { font-size: 13px; font-weight: 600; }
+.shop-row-count { font-weight: 400; color: var(--ink-soft); font-size: 12px; }
+.shop-row-desc { font-size: 11px; color: var(--ink-soft); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.shop-row-price {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+  white-space: nowrap;
+}
+.shop-row-price.sell-price { color: var(--leaf); }
+
+.shop-buy-btn, .shop-sell-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 100px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.shop-buy-btn {
+  background: var(--accent);
+  color: #fff;
+}
+.shop-buy-btn:hover { background: var(--accent-deep); }
+.shop-buy-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.shop-sell-btn {
+  background: var(--leaf);
+  color: #fff;
+}
+.shop-sell-btn:hover { background: #5a7e4a; }
+
+.shop-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ink-soft);
+  font-style: italic;
+  font-size: 14px;
+}
+
 /* 반응형 */
 @media (max-width: 780px) {
   .game-main { grid-template-columns: 1fr; }
@@ -399,4 +575,5 @@ input { font-family: inherit; }
   .hud-stats { gap: 10px; }
   .bar { width: 50px; }
   .hud { padding: 10px 12px; flex-wrap: wrap; gap: 8px; }
+  .shop-card { max-height: 90vh; }
 }

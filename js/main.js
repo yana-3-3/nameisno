@@ -13,6 +13,10 @@ import {
   renderChatMessage,
   clearChat,
   toast,
+  openShop,
+  closeShop,
+  renderShopContent,
+  setShopMode,
 } from "./ui.js";
 import { subscribeChat, sendChat, setupPresence } from "./chat.js";
 
@@ -177,10 +181,65 @@ async function onAction(actionId) {
       break;
     }
 
+    case "open_shop": {
+      openShop(player.data, handleBuy, handleSell);
+      break;
+    }
+
     default:
       toast("아직 준비 중인 기능이에요");
   }
 }
+
+// ============================================
+// 4b) 상점 시스템
+// ============================================
+
+async function handleBuy(itemId) {
+  const item = ITEMS[itemId];
+  if (!item || !player.data) return;
+  const money = player.data.stats.money || 0;
+  if (money < item.buy) {
+    toast("돈이 부족해요!");
+    return;
+  }
+  await player.addMoney(-item.buy);
+  await player.addItem(item.id, item.name, 1);
+  toast(`${item.name}을(를) 구매했어요!`);
+}
+
+async function handleSell(itemId) {
+  const item = ITEMS[itemId];
+  if (!item || !player.data) return;
+  const success = await player.removeItem(itemId, 1);
+  if (!success) {
+    toast("아이템이 부족해요!");
+    return;
+  }
+  await player.addMoney(item.sell);
+  toast(`${item.name}을(를) ${item.sell}G에 팔았어요`);
+}
+
+// 상점 모달 이벤트
+document.getElementById("shop-close").addEventListener("click", closeShop);
+document.getElementById("shop-modal").addEventListener("click", (e) => {
+  if (e.target.id === "shop-modal") closeShop();
+});
+document.querySelectorAll(".shop-mode-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    setShopMode(tab.dataset.mode);
+    if (player.data) renderShopContent(player.data);
+  });
+});
+
+// 상점 데이터가 바뀔 때마다 자동 갱신 (돈/인벤토리 변화 반영)
+player.subscribe((data) => {
+  if (!data) return;
+  const modal = document.getElementById("shop-modal");
+  if (!modal.classList.contains("hidden")) {
+    renderShopContent(data);
+  }
+});
 
 // ============================================
 // 5) 사이드바 탭 전환 (인벤토리 ↔ 채팅)

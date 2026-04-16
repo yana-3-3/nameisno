@@ -2,7 +2,7 @@
 // UI 렌더링 — DOM 업데이트 담당
 // ============================================
 
-import { LOCATIONS, LOCATION_ICONS, ITEMS } from "./world.js";
+import { LOCATIONS, LOCATION_ICONS, ITEMS, CATEGORIES, getShopByCategory } from "./world.js";
 
 const INVENTORY_SLOTS = 16;
 
@@ -354,4 +354,140 @@ function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str;
   return div.innerHTML;
+}
+
+// ============================================
+// 상점 모달
+// ============================================
+
+let _shopMode = "buy";     // "buy" | "sell"
+let _shopCat = null;       // 현재 선택된 카테고리
+let _onBuy = null;
+let _onSell = null;
+
+export function openShop(playerData, onBuy, onSell) {
+  _onBuy = onBuy;
+  _onSell = onSell;
+  _shopMode = "buy";
+  _shopCat = null;
+  const modal = document.getElementById("shop-modal");
+  modal.classList.remove("hidden");
+  renderShopContent(playerData);
+}
+
+export function closeShop() {
+  document.getElementById("shop-modal").classList.add("hidden");
+}
+
+export function renderShopContent(playerData) {
+  const container = document.getElementById("shop-items");
+  const moneyEl = document.getElementById("shop-money");
+  moneyEl.textContent = (playerData?.stats?.money || 0).toLocaleString() + " G";
+
+  // 탭 활성화
+  document.querySelectorAll(".shop-mode-tab").forEach(t => {
+    t.classList.toggle("active", t.dataset.mode === _shopMode);
+  });
+
+  container.innerHTML = "";
+
+  if (_shopMode === "buy") {
+    renderBuyMode(container, playerData);
+  } else {
+    renderSellMode(container, playerData);
+  }
+}
+
+function renderBuyMode(container, playerData) {
+  const byCategory = getShopByCategory();
+  const cats = Object.keys(byCategory);
+
+  if (!_shopCat || !byCategory[_shopCat]) _shopCat = cats[0];
+
+  // 카테고리 탭들
+  const catBar = document.createElement("div");
+  catBar.className = "shop-cat-bar";
+  for (const catKey of cats) {
+    const cat = CATEGORIES[catKey];
+    const btn = document.createElement("button");
+    btn.className = "shop-cat-btn" + (catKey === _shopCat ? " active" : "");
+    btn.style.setProperty("--cat-color", cat.color);
+    btn.textContent = cat.name;
+    btn.addEventListener("click", () => {
+      _shopCat = catKey;
+      renderShopContent(playerData);
+    });
+    catBar.appendChild(btn);
+  }
+  container.appendChild(catBar);
+
+  // 아이템 리스트
+  const list = document.createElement("div");
+  list.className = "shop-list";
+  const items = byCategory[_shopCat] || [];
+  const money = playerData?.stats?.money || 0;
+
+  for (const item of items) {
+    const canAfford = money >= item.buy;
+    const row = document.createElement("div");
+    row.className = "shop-row" + (canAfford ? "" : " cant-afford");
+    row.innerHTML = `
+      <div class="shop-row-icon"><svg viewBox="0 0 32 32">${item.icon}</svg></div>
+      <div class="shop-row-info">
+        <div class="shop-row-name">${item.name}</div>
+        <div class="shop-row-desc">${item.desc}</div>
+      </div>
+      <div class="shop-row-price">${item.buy} G</div>
+    `;
+    const buyBtn = document.createElement("button");
+    buyBtn.className = "shop-buy-btn";
+    buyBtn.textContent = "구매";
+    buyBtn.disabled = !canAfford;
+    buyBtn.addEventListener("click", () => {
+      if (_onBuy) _onBuy(item.id);
+    });
+    row.appendChild(buyBtn);
+    list.appendChild(row);
+  }
+  container.appendChild(list);
+}
+
+function renderSellMode(container, playerData) {
+  const inv = playerData?.inventory || [];
+  const list = document.createElement("div");
+  list.className = "shop-list";
+
+  if (inv.length === 0) {
+    list.innerHTML = `<div class="shop-empty">판매할 아이템이 없어요</div>`;
+    container.appendChild(list);
+    return;
+  }
+
+  for (const slot of inv) {
+    const item = ITEMS[slot.id];
+    if (!item) continue;
+    const row = document.createElement("div");
+    row.className = "shop-row";
+    row.innerHTML = `
+      <div class="shop-row-icon"><svg viewBox="0 0 32 32">${item.icon}</svg></div>
+      <div class="shop-row-info">
+        <div class="shop-row-name">${item.name} <span class="shop-row-count">× ${slot.count}</span></div>
+        <div class="shop-row-desc">${item.desc}</div>
+      </div>
+      <div class="shop-row-price sell-price">${item.sell} G</div>
+    `;
+    const sellBtn = document.createElement("button");
+    sellBtn.className = "shop-sell-btn";
+    sellBtn.textContent = "판매";
+    sellBtn.addEventListener("click", () => {
+      if (_onSell) _onSell(item.id);
+    });
+    row.appendChild(sellBtn);
+    list.appendChild(row);
+  }
+  container.appendChild(list);
+}
+
+export function setShopMode(mode) {
+  _shopMode = mode;
 }
