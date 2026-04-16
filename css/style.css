@@ -219,10 +219,10 @@ input { font-family: inherit; }
 .world-header p { color: var(--ink-soft); font-size: 13px; margin-top: 4px; }
 
 .tilemap-wrap {
-  background: linear-gradient(180deg, #e8e0cc 0%, #d8d0b8 100%);
+  background: linear-gradient(180deg, #7db358 0%, #6aa348 100%);
   border-radius: var(--radius-sm);
-  padding: 8px;
-  border: 1px solid var(--line);
+  padding: 4px;
+  border: 2px solid #5a8a3c;
 }
 #tilemap { width: 100%; height: auto; display: block; }
 
